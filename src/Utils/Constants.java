@@ -37,8 +37,12 @@ public interface Constants {
     int ITEM_WIDTH = 26;
     int ITEM_HEIGHT = 12;
 
-    int ITEM_SPEED = 1;
+    int ITEM_SPEED = 3;
     int BALL_SPEED = 6;
+
+    int IMAGE_MERGE = 5;
+
+    int LASERBALL_SPEED = 3;
 
     int BAUSS_WIDTH = 60;
     int BAUSS_HEIGHT = 15;
