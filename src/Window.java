@@ -16,7 +16,7 @@ public class Window extends PApplet implements Constants {
     private boolean isPressedLeft;
     private List<LaserBall> laserBalls = new ArrayList<>();
     private boolean start = false;
-    private int life = 3;
+    private int life = 2;
 
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -41,7 +41,12 @@ public class Window extends PApplet implements Constants {
         }
     }
 
+    int tick;
+
     public void draw() {
+        tick++;
+        if (tick % 30 == 0)
+            System.out.println(ball.getSpeedY());
         background(0);
 
         image(SpriteManager.getImage(BLOCK_WALL, 0), MARGIN_HORIZONTAL - 33, 0,
@@ -59,6 +64,9 @@ public class Window extends PApplet implements Constants {
             bauss.getPos().setY(WINDOW_HEIGHT - 100);
             ball.getPos().setX(bauss.getPos().getX() + 5);
             ball.getPos().setY(bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
+            ball.setSpeedX(BALL_SPEED / 2);
+            ball.setSpeedX(BALL_SPEED);
+            ball.setDirection(new Vector2(1, -1));
         }
 
         for (int i = 0; i < life; i++) {
@@ -75,13 +83,15 @@ public class Window extends PApplet implements Constants {
                 if (ball.getVelocity().getX() < 0) {
                     ball.invertX();
                 }
-//                ball.getVelocity().setX(ball.getVelocity().getX());
+//                ball.setSpeedY(ball.getSpeedY() - (ball.getSpeedX() - ball.getSpeedX() * diff/10));
+                ball.setSpeedX(ball.getSpeedX() * diff / 10);
                 ball.invertY();
             } else {
                 if (ball.getVelocity().getX() > 0) {
                     ball.invertX();
                 }
-//                ball.getVelocity().setX(ball.getVelocity().getX());
+//                ball.setSpeedY(ball.getSpeedY() - (ball.getSpeedX() - ball.getSpeedX() * diff/10));
+                ball.setSpeedX(ball.getSpeedX() * ((-1) * diff / 10));
                 ball.invertY();
             }
         }
@@ -141,14 +151,22 @@ public class Window extends PApplet implements Constants {
                         addItem(blocks[i][j]);
                     }
 
-                    if (ball.getPos().getY() < blocks[i][j].getPos().getY() + BLOCK_HEIGHT / 2 + BALL_RADIUS) {
-                        ball.invertY();
-                    } else if (ball.getPos().getY() > blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2 + BALL_RADIUS) {
-                        ball.invertY();
-                    } else if (ball.getPos().getX() < blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2 + BALL_RADIUS) {
+                    if (ball.getPos().getX() < blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2 - BALL_RADIUS) {
+                        ball.setPos(new Vector2(ball.getPos().getX() - (BALL_RADIUS - (blocks[i][j].getPos().getX() - ball.getPos().getX() - BLOCK_WIDTH / 2)),
+                                ball.getPos().getY()));
                         ball.invertX();
                     } else if (ball.getPos().getX() > blocks[i][j].getPos().getX() + BLOCK_WIDTH / 2 + BALL_RADIUS) {
+                        ball.setPos(new Vector2(ball.getPos().getX() + (BALL_RADIUS - (ball.getPos().getX() - blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2)),
+                                ball.getPos().getY()));
                         ball.invertX();
+                    } else if (ball.getPos().getY() < blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2 - BALL_RADIUS) {
+                        ball.setPos(new Vector2(ball.getPos().getX(),
+                                ball.getPos().getY() - (BALL_RADIUS - (blocks[i][j].getPos().getY() - ball.getPos().getY() - BLOCK_HEIGHT / 2))));
+                        ball.invertY();
+                    } else {
+                        ball.setPos(new Vector2(ball.getPos().getX(),
+                                ball.getPos().getY() + (BALL_RADIUS - (ball.getPos().getY() - blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2))));
+                        ball.invertY();
                     }
                 }
             }
