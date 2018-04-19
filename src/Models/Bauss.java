@@ -8,14 +8,13 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Bauss implements Constants {
-    private Vector2 pos;
+public class Bauss extends View implements Constants {
     private int tick;
     private int itemState;
     private List<Integer> itemTimes = new ArrayList<>();
 
     public Bauss() {
-        pos = new Vector2(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 100);
+         setPos(new Vector2(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 100));
     }
 
     public void update() {
@@ -34,11 +33,11 @@ public class Bauss implements Constants {
         tick++;
 
         if (itemState == ITEM_LASER) {
-            pApplet.image(SpriteManager.getImage(BAUSS_LASER, tick / 10 % 6), pos.getX() - BAUSS_WIDTH / 2, pos.getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH, BAUSS_HEIGHT);
+            pApplet.image(SpriteManager.getImage(BAUSS_LASER, tick / 10 % 6), getPos().getX() - BAUSS_WIDTH / 2, getPos().getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH, BAUSS_HEIGHT);
         } else if (itemState == ITEM_EXTEND) {
-            pApplet.image(SpriteManager.getImage(BAUSS_EXTEND, tick / 10 % 6), pos.getX() - BAUSS_WIDTH / 2, pos.getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH * 2, BAUSS_HEIGHT);
+            pApplet.image(SpriteManager.getImage(BAUSS_EXTEND, tick / 10 % 6), getPos().getX() - BAUSS_WIDTH / 2, getPos().getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH * 2, BAUSS_HEIGHT);
         } else
-            pApplet.image(SpriteManager.getImage(BAUSS_NORMAL, tick / 10 % 6), pos.getX() - BAUSS_WIDTH / 2, pos.getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH, BAUSS_HEIGHT);
+            pApplet.image(SpriteManager.getImage(BAUSS_NORMAL, tick / 10 % 6), getPos().getX() - BAUSS_WIDTH / 2, getPos().getY() - BAUSS_HEIGHT / 2, BAUSS_WIDTH, BAUSS_HEIGHT);
     }
 
 
@@ -48,17 +47,13 @@ public class Bauss implements Constants {
     }
 
     public void moveLeft() {
-        if (MARGIN_HORIZONTAL <= pos.getX() - BAUSS_WIDTH / 2)
-            pos.setX(pos.getX() - BAUSS_SPEED);
+        if (MARGIN_HORIZONTAL <= getPos().getX() - BAUSS_WIDTH / 2)
+            getPos().setX(getPos().getX() - BAUSS_SPEED);
     }
 
     public void moveRight() {
-        if (WINDOW_WIDTH - MARGIN_HORIZONTAL >= pos.getX() + BAUSS_WIDTH / 2)
-            pos.setX(pos.getX() + BAUSS_SPEED);
-    }
-
-    public Vector2 getPos() {
-        return pos;
+        if (WINDOW_WIDTH - MARGIN_HORIZONTAL >= getPos().getX() + BAUSS_WIDTH / 2)
+            getPos().setX(getPos().getX() + BAUSS_SPEED);
     }
 
 }

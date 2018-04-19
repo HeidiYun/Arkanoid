@@ -58,7 +58,7 @@ public class Window extends PApplet implements Constants {
             bauss.getPos().setX(WINDOW_WIDTH / 2);
             bauss.getPos().setY(WINDOW_HEIGHT - 100);
             ball.getPos().setX(bauss.getPos().getX() + 5);
-            ball.getPos().setY( bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
+            ball.getPos().setY(bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
         }
 
         for (int i = 0; i < life; i++) {
@@ -73,16 +73,16 @@ public class Window extends PApplet implements Constants {
             System.out.println(diff);
             if (diff > 0) {
                 if (ball.getVelocity().getX() < 0) {
-                    ball.getVelocity().setX(ball.getVelocity().getX() * -1);
+                    ball.invertX();
                 }
-                ball.getVelocity().setX(ball.getVelocity().getX());
-                ball.getVelocity().setY(ball.getVelocity().getY() * -1);
+//                ball.getVelocity().setX(ball.getVelocity().getX());
+                ball.invertY();
             } else {
                 if (ball.getVelocity().getX() > 0) {
-                    ball.getVelocity().setX(ball.getVelocity().getX() * -1);
+                    ball.invertX();
                 }
-                ball.getVelocity().setX(ball.getVelocity().getX());
-                ball.getVelocity().setY(ball.getVelocity().getY() * -1);
+//                ball.getVelocity().setX(ball.getVelocity().getX());
+                ball.invertY();
             }
         }
     }
@@ -119,8 +119,9 @@ public class Window extends PApplet implements Constants {
 
     public void drawBall() {
         initBall();
-        ball.update();
+
         ball.render(this);
+        ball.update();
     }
 
     public void addItem(Block block) {
@@ -129,7 +130,7 @@ public class Window extends PApplet implements Constants {
     }
 
     public void ballBlockCollision() {
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 25; i++) {
             for (int j = 0; j < 13; j++) {
                 if (CollisionChecker.rectCircleCollision(blocks[i][j].getPos(), ball.getPos(), BLOCK_WIDTH, BLOCK_HEIGHT, BALL_RADIUS)
                         && !blocks[i][j].isDestroyed()) {
@@ -138,17 +139,16 @@ public class Window extends PApplet implements Constants {
                     if (blocks[i][j].getLife() < 1) {
                         blocks[i][j].destroy();
                         addItem(blocks[i][j]);
-
                     }
 
                     if (ball.getPos().getY() < blocks[i][j].getPos().getY() + BLOCK_HEIGHT / 2 + BALL_RADIUS) {
-                        ball.getVelocity().setY(ball.getVelocity().getY() * -1);
+                        ball.invertY();
                     } else if (ball.getPos().getY() > blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2 + BALL_RADIUS) {
-                        ball.getVelocity().setY(ball.getVelocity().getY() * -1);
+                        ball.invertY();
                     } else if (ball.getPos().getX() < blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2 + BALL_RADIUS) {
-                        ball.getVelocity().setX(ball.getVelocity().getX() * -1);
+                        ball.invertX();
                     } else if (ball.getPos().getX() > blocks[i][j].getPos().getX() + BLOCK_WIDTH / 2 + BALL_RADIUS) {
-                        ball.getVelocity().setX(ball.getVelocity().getX() * -1);
+                        ball.invertX();
                     }
                 }
             }
@@ -157,8 +157,9 @@ public class Window extends PApplet implements Constants {
 
     public void initBall() {
         if (!start && millis() > 2000) {
-            ball.getVelocity().setY(-BALL_SPEED);
-            ball.getVelocity().setX(BALL_SPEED / 2);
+            ball.setSpeedX(BALL_SPEED / 2);
+            ball.setSpeedY(BALL_SPEED);
+            ball.setDirection(new Vector2(1, -1));
             start = true;
         }
     }

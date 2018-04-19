@@ -5,32 +5,29 @@ import Utils.Vector2;
 import dwon.SpriteManager.SpriteManager;
 import processing.core.PApplet;
 
-public class Item implements Constants {
-    private Vector2 pos;
+public class Item extends View implements Constants {
     private int state;
     private int tick;
     private boolean isCollision;
 
     public Item(Vector2 vector2, int state) {
-        this.pos = new Vector2(vector2.getX(), vector2.getY());
+        setPos(new Vector2(vector2.getX(), vector2.getY()));
         this.state = state;
     }
 
+    @Override
     public void update() {
-        pos.setY((pos.getY() + ITEM_SPEED));
+        setPos(new Vector2(getPos().getX(), getPos().getY() + ITEM_SPEED));
     }
 
+    @Override
     public void render(PApplet pApplet) {
         tick++;
         if (!isCollision)
             pApplet.image(SpriteManager.getImage(state, tick / 10 % 8),
-                    pos.getX() - ITEM_WIDTH / 2,
-                    pos.getY() - ITEM_HEIGHT / 2,
+                    getPos().getX() - ITEM_WIDTH / 2,
+                    getPos().getY() - ITEM_HEIGHT / 2,
                     ITEM_WIDTH, ITEM_HEIGHT);
-    }
-
-    public Vector2 getPos() {
-        return pos;
     }
 
     public int getState() {

@@ -56,4 +56,12 @@ public abstract class View {
     public void setVelocity(Vector2 velocity) {
         this.velocity = velocity;
     }
+
+    public void invertX() {
+        setDirection(new Vector2(getDirection().getX() * -1, getDirection().getY()));
+    }
+
+    public void invertY() {
+        setDirection(new Vector2(getDirection().getX(),getDirection().getY() * -1));
+    }
 }

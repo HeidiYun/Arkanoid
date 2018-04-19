@@ -6,8 +6,7 @@ import Utils.Vector2;
 import dwon.SpriteManager.SpriteManager;
 import processing.core.PApplet;
 
-public class Block implements Constants {
-    private Vector2 pos;
+public class Block extends View implements Constants {
     private int item;
     private int color;
     private int life;
@@ -15,17 +14,23 @@ public class Block implements Constants {
 
     public Block(int x, int y, int color, int item, int life) {
 //        this.pos = new Utils.pos2(x, y);
-        this.pos = Util.indexToCoord(x, y);
+        setPos(Util.indexToCoord(x, y));
         this.color = color;
         this.item = item;
         this.life = life;
     }
 
+    @Override
+    public void update() {
+
+    }
+
+    @Override
     public void render(PApplet pApplet) {
         if (!isDestroyed && color != 0)
             pApplet.image(SpriteManager.getImage(color, 0),
-                    pos.getX() - Constants.BLOCK_WIDTH / 2,
-                    pos.getY() - Constants.BLOCK_HEIGHT / 2,
+                    getPos().getX() - Constants.BLOCK_WIDTH / 2,
+                    getPos().getY() - Constants.BLOCK_HEIGHT / 2,
                     Constants.BLOCK_WIDTH, Constants.BLOCK_HEIGHT);
     }
 
@@ -44,11 +49,7 @@ public class Block implements Constants {
     public boolean isDestroyed() {
         return isDestroyed;
     }
-
-    public Vector2 getPos() {
-        return pos;
-    }
-
+    
     public int getItem() {
         return item;
     }
