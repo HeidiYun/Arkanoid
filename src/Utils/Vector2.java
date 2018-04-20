@@ -40,6 +40,18 @@ public class Vector2 {
         return this;
     }
 
+
+
+    public float magnitude() {
+        return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    }
+
+    public Vector2 normalize() {
+        this.x /= this.magnitude();
+        this.y /= this.magnitude();
+        return this;
+    }
+
     public float getX() {
         return x;
     }

@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CollisionChecker {
+    // layer를 숫자로
+    // onCollision에서 충동한 객체도 알아야함
 
     private static HashMap<Class<? extends View>, List<View>> library = new HashMap<>();
     private static HashMap<Class<? extends View>, String> shapes = new HashMap<>();
     private static HashMap<View, OnCollisionListener> listeners = new HashMap<>();
-//    private static List<OnCollisionListener> listenerList = new ArrayList<>();
 
     public CollisionChecker() { }
 
@@ -64,6 +65,7 @@ public class CollisionChecker {
         if (!library.containsKey(view.getClass())) {
             list = new ArrayList<>();
             list.add(view);
+            library.put(view.getClass(), list);
         } else {
             list = library.get(view.getClass());
             list.add(view);

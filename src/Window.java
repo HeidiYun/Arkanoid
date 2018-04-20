@@ -16,8 +16,7 @@ public class Window extends PApplet implements Constants {
     private boolean isPressedRight;
     private boolean isPressedLeft;
     private boolean start = false;
-    private boolean isBallBlockCollision;
-    private  float diff;
+    private boolean isBallVausCollision;
     private List<Laser> lasers = new LinkedList<>();
     private CollisionChecker collisionChecker = new CollisionChecker();
 
@@ -48,12 +47,18 @@ public class Window extends PApplet implements Constants {
     }
 
     private void addListeners() {
-        collisionChecker.addOnCollisionListener(vaus, view -> System.out.println(view.toString() + " vaus col!"));
+        collisionChecker.addOnCollisionListener(vaus, (view) -> {
+            System.out.println(view.toString() + " vaus col!");
+            ballVausCollision();
+        });
         collisionChecker.addOnCollisionListener(ball, view -> System.out.println(view.toString() + " ball col!"));
 
         for (int i = 0; i < BLOCK_ROW; i++) {
             for (int j = 0; j < BLOCK_COLUMN; j++) {
-                collisionChecker.addOnCollisionListener(blocks[i][j], view -> System.out.println(view.toString() + " blocks[i][j] col!"));
+                collisionChecker.addOnCollisionListener(blocks[i][j], view -> {
+                    System.out.println(view.toString() + " blocks[i][j] col!");
+                    ballBlockCollision();
+                });
             }
         }
     }
@@ -89,7 +94,7 @@ public class Window extends PApplet implements Constants {
         drawItems();
         drawLaserBalls();
         laserBallBlockCollision();
-        ballVausCollision();
+//        ballVausCollision();
         drawVaus();
         drawBall();
 
@@ -113,6 +118,8 @@ public class Window extends PApplet implements Constants {
 
 
     }
+
+
 
     public void ballVausCollision() {
         if (CollisionChecker.rectCircleCollision(vaus.getPos(), ball.getPos(), VAUS_WIDTH + vaus.getWideWidth(),
@@ -141,7 +148,7 @@ public class Window extends PApplet implements Constants {
 
     public void drawBlocks() {
         renderBlocks();
-        ballBlockCollision();
+//        ballBlockCollision();
     }
 
     public void drawLaserBalls() {
@@ -168,6 +175,8 @@ public class Window extends PApplet implements Constants {
 
         }
     }
+
+    public void itemCollision() {}
 
     public void drawVaus() {
         moveVaus();
@@ -251,6 +260,8 @@ public class Window extends PApplet implements Constants {
         }
     }
 
+
+
     public void initBall() {
         if (!start && tick > 30 * 2) {
             System.out.println("init");
@@ -258,25 +269,25 @@ public class Window extends PApplet implements Constants {
             ball.setSpeedY(BALL_SPEED);
             ball.setDirection(new Vector2(1, -1));
             start = true;
-            isBallBlockCollision = false;
+            isBallVausCollision = false;
         } else {
             if (!start)
-                isBallBlockCollision = true;
-            else isBallBlockCollision = false;
+                isBallVausCollision = true;
+            else isBallVausCollision = false;
         }
     }
 
     public void moveVaus() {
         if (isPressedRight) {
             vaus.moveRight();
-            if (isBallBlockCollision) {
+            if (isBallVausCollision) {
                 ball.getPos().setX(ball.getPos().getX() + VAUS_SPEED);
             }
         }
 
         if (isPressedLeft) {
             vaus.moveLeft();
-            if (isBallBlockCollision) {
+            if (isBallVausCollision) {
                 ball.getPos().setX(ball.getPos().getX() - VAUS_SPEED);
             }
         }
@@ -334,7 +345,7 @@ public class Window extends PApplet implements Constants {
                     ball.setPos(new Vector2(ball.getPos().getX(),
                             ball.getPos().getY() - (BALL_RADIUS - (vaus.getPos().getY() - ball.getPos().getY() - VAUS_HEIGHT / 2))));
                     ball.setDirection(new Vector2(1, -1));
-                    isBallBlockCollision = false;
+                    isBallVausCollision = false;
                 }
                 break;
 
