@@ -29,7 +29,7 @@ public interface Constants {
 
     int BALL_RADIUS = 5;
 
-    int BLOCK_ROW = 6;
+    int BLOCK_ROW = 25;
     int BLOCK_COLUMN = 13;
 
     int WINDOW_WIDTH = 480;
@@ -43,15 +43,17 @@ public interface Constants {
 
     int IMAGE_MERGE = 5;
 
-    int LASERBALL_SPEED = 3;
+    int LASER_SPEED = 6;
+    int LASER_RADIUS = 3;
+    int LASER_LIMIT = 6;
 
-    int BAUSS_WIDTH = 60;
-    int BAUSS_HEIGHT = 15;
-    int BAUSS_SPEED = 10;
+    int VAUS_WIDTH = 60;
+    int VAUS_HEIGHT = 15;
+    int VAUS_SPEED = 10;
 
-    int BAUSS_NORMAL = 21;
-    int BAUSS_LASER = 22;
-    int BAUSS_EXTEND = 23;
+    int VAUS_NORMAL = 21;
+    int VAUS_LASER = 22;
+    int VAUS_EXTEND = 23;
 
     int MARGIN_HORIZONTAL = (WINDOW_WIDTH - BLOCK_WIDTH * BLOCK_COLUMN) / 2 + (BLOCK_WIDTH / 2);
     int MARGIN_VERTICAL = BLOCK_HEIGHT / 2;

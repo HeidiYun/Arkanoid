@@ -8,17 +8,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Window extends PApplet implements Constants {
-    Block[][] blocks = new Block[100][13];
+    private Block[][] blocks = new Block[100][13];
     private Ball ball;
     private boolean ballPressed = false;
     private List<Item> items = new ArrayList<>();
-    private Bauss bauss;
+    private Vaus vaus;
     private boolean isPressedRight;
     private boolean isPressedLeft;
     private boolean start = false;
-    private List<LaserBall> laserBalls = new ArrayList<>();
     private boolean isBallBlockCollision;
     private  float diff;
+    private List<Laser> lasers = new LinkedList<>();
+    private CollisionChecker collisionChecker = new CollisionChecker();
 
 
     public void settings() {
@@ -27,20 +28,46 @@ public class Window extends PApplet implements Constants {
 
     public void setup() {
         setupMap();
-        bauss = new Bauss();
-        ball = new Ball(bauss.getPos().getX() + 5, bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
+        vaus = new Vaus();
+        ball = new Ball(vaus.getPos().getX() + 5, vaus.getPos().getY() - (VAUS_HEIGHT / 2) - BALL_RADIUS);
 
         loadImage();
+        allocateCollision();
+        addListeners();
     }
 
-    public void setupMap() {
+    private void allocateCollision() {
+        CollisionChecker.allocate(vaus, "rect");
+        CollisionChecker.allocate(ball, "circle");
+
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
+                CollisionChecker.allocate(blocks[i][j], "rect");
+            }
+        }
+    }
+
+    private void addListeners() {
+        collisionChecker.addOnCollisionListener(vaus, view -> System.out.println(view.toString() + " vaus col!"));
+        collisionChecker.addOnCollisionListener(ball, view -> System.out.println(view.toString() + " ball col!"));
+
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
+                collisionChecker.addOnCollisionListener(blocks[i][j], view -> System.out.println(view.toString() + " blocks[i][j] col!"));
+            }
+        }
+    }
+
+    private void setupMap() {
         String[][] s = CsvFileManager.getCsvArray("./data/map.dat");
 
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 13; j++) {
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
                 blocks[i][j] = new Block(j, i, (Integer.parseInt(s[i][j]) / 100) * 10,
                         Integer.parseInt(s[i][j]) % 100 / 10,
                         Integer.parseInt(s[i][j]) % 10);
+                if (blocks[i][j].getLife() < 1)
+                    blocks[i][j].destroy();
             }
         }
     }
@@ -48,6 +75,7 @@ public class Window extends PApplet implements Constants {
     int tick;
 
     public void draw() {
+        CollisionChecker.checkCollisions();
         tick++;
 
         if (tick % 30 == 0)
@@ -61,36 +89,37 @@ public class Window extends PApplet implements Constants {
         drawItems();
         drawLaserBalls();
         laserBallBlockCollision();
-        ballBaussCollision();
-        drawBauss();
+        ballVausCollision();
+        drawVaus();
         drawBall();
 
         if (ball.getPos().getY() > WINDOW_HEIGHT) {
-            bauss.minusPlayerLife();
-            bauss.getPos().setX(WINDOW_WIDTH / 2);
-            bauss.getPos().setY(WINDOW_HEIGHT - 100);
-            ball.getPos().setX(bauss.getPos().getX() + 5);
-            ball.getPos().setY(bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
+            vaus.minusPlayerLife();
+            vaus.getPos().setX(WINDOW_WIDTH / 2);
+            vaus.getPos().setY(WINDOW_HEIGHT - 100);
+            ball.getPos().setX(vaus.getPos().getX() + 5);
+            ball.getPos().setY(vaus.getPos().getY() - VAUS_HEIGHT / 2 - BALL_RADIUS);
             ball.setSpeedX(0);
             ball.setSpeedX(0);
             ball.setDirection(new Vector2(0, 0));
-            bauss.setItemState(NONE_ITEM);
+            vaus.setItemState(NONE_ITEM);
             start = false;
             tick = 0;
         }
 
-        for (int i = 0; i < bauss.getPlayerLife(); i++) {
-            image(SpriteManager.getImage(BAUSS_NORMAL, 0), 55 * (i + 1), 780, BAUSS_WIDTH / 2, BAUSS_HEIGHT);
+        for (int i = 0; i < vaus.getPlayerLife(); i++) {
+            image(SpriteManager.getImage(VAUS_NORMAL, 0), 55 * (i + 1), 780, VAUS_WIDTH / 2, VAUS_HEIGHT);
         }
 
 
     }
 
-    public void ballBaussCollision() {
-        if (CollisionChecker.rectCircleCollision(bauss.getPos(), ball.getPos(), BAUSS_WIDTH + bauss.getWideWidth(), BAUSS_HEIGHT, BALL_RADIUS) && start) {
-            diff = Util.difference(ball.getPos().getX(), bauss.getPos().getX());
-            {
-                System.out.println(diff);
+    public void ballVausCollision() {
+        if (CollisionChecker.rectCircleCollision(vaus.getPos(), ball.getPos(), VAUS_WIDTH + vaus.getWideWidth(),
+                VAUS_HEIGHT, BALL_RADIUS) && start) {
+            float diff = Util.difference(ball.getPos().getX(), vaus.getPos().getX());
+            if (vaus.getItemState() != ITEM_CLASP) {
+//                System.out.println(diff);
                 if (diff > 0) {
                     if (ball.getVelocity().getX() < 0) {
                         ball.invertX();
@@ -106,11 +135,7 @@ public class Window extends PApplet implements Constants {
                     ball.setSpeedX(ball.getSpeedX() * ((-1) * diff / 10));
                     ball.invertY();
                 }
-                
-
-
             }
-
         }
     }
 
@@ -120,11 +145,11 @@ public class Window extends PApplet implements Constants {
     }
 
     public void drawLaserBalls() {
-        for (int i = 0; i < laserBalls.size(); i++) {
-            laserBalls.get(i).render(this);
-            laserBalls.get(i).update();
-            if (laserBalls.get(i).getOverHeight())
-                laserBalls.remove(laserBalls.get(i));
+        for (int i = 0; i < lasers.size(); i++) {
+            lasers.get(i).render(this);
+            lasers.get(i).update();
+            if (lasers.get(i).getOverHeight())
+                lasers.remove(lasers.get(i));
         }
     }
 
@@ -134,25 +159,26 @@ public class Window extends PApplet implements Constants {
             items.get(i).update();
             items.get(i).render(this);
 
-            if (CollisionChecker.rectCollision(bauss.getPos(), items.get(i).getPos(), BAUSS_WIDTH + bauss.getWideWidth(), BAUSS_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)) {
+            if (CollisionChecker.rectCollision(vaus.getPos(), items.get(i).getPos(),
+                    VAUS_WIDTH + vaus.getWideWidth(), VAUS_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT)) {
                 items.get(i).setCollision();
-                bauss.setItemState(items.get(i).getState());
+                vaus.setItemState(items.get(i).getState());
                 items.remove(i);
             }
 
         }
     }
 
-    public void drawBauss() {
-        moveBauss();
-        bauss.update();
-        bauss.render(this);
+    public void drawVaus() {
+        moveVaus();
+        vaus.update();
+        vaus.render(this);
     }
 
     public void drawBall() {
         initBall();
 
-        if (bauss.getItemState() == ITEM_SLOW) {
+        if (vaus.getItemState() == ITEM_SLOW) {
             ball.setSpeedX((float) (ball.getSpeedX() * 0.1));
             ball.setSpeedX((float) (ball.getSpeedY() * 0.1));
         }
@@ -166,16 +192,16 @@ public class Window extends PApplet implements Constants {
     }
 
     public void laserBallBlockCollision() {
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 13; j++) {
-                for (int k = 0; k < laserBalls.size(); k++) {
-                    if (CollisionChecker.rectCircleCollision(blocks[i][j].getPos(), laserBalls.get(k).getPos(), BLOCK_WIDTH, BLOCK_HEIGHT, BALL_RADIUS)
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
+                for (int k = 0; k < lasers.size(); k++) {
+                    if (CollisionChecker.rectCircleCollision(blocks[i][j].getPos(), lasers.get(k).getPos(), BLOCK_WIDTH, BLOCK_HEIGHT, BALL_RADIUS)
                             && !blocks[i][j].isDestroyed()) {
 //                    ball.getVelocity().setY(ball.getVelocity().getY() * -1);
                         blocks[i][j].minusLife();
                         if (blocks[i][j].getLife() < 1) {
                             blocks[i][j].destroy();
-                            laserBalls.remove(laserBalls.get(k));
+                            lasers.remove(lasers.get(k));
                             addItem(blocks[i][j]);
                         }
                     }
@@ -186,8 +212,8 @@ public class Window extends PApplet implements Constants {
     }
 
     public void ballBlockCollision() {
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 13; j++) {
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
                 if (CollisionChecker.rectCircleCollision(blocks[i][j].getPos(), ball.getPos(), BLOCK_WIDTH, BLOCK_HEIGHT, BALL_RADIUS)
                         && !blocks[i][j].isDestroyed()) {
 //                    ball.getVelocity().setY(ball.getVelocity().getY() * -1);
@@ -198,20 +224,26 @@ public class Window extends PApplet implements Constants {
                     }
 
                     if (ball.getPos().getX() < blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2 - BALL_RADIUS) {
-                        ball.setPos(new Vector2(ball.getPos().getX() - (BALL_RADIUS - (blocks[i][j].getPos().getX() - ball.getPos().getX() - BLOCK_WIDTH / 2)),
+                        ball.setPos(new Vector2(ball.getPos().getX()
+                                - (BALL_RADIUS - (blocks[i][j].getPos().getX() - ball.getPos().getX() - BLOCK_WIDTH / 2)),
                                 ball.getPos().getY()));
                         ball.invertX();
                     } else if (ball.getPos().getX() > blocks[i][j].getPos().getX() + BLOCK_WIDTH / 2 + BALL_RADIUS) {
-                        ball.setPos(new Vector2(ball.getPos().getX() + (BALL_RADIUS - (ball.getPos().getX() - blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2)),
+                        ball.setPos(new Vector2(ball.getPos().getX()
+                                + (BALL_RADIUS - (ball.getPos().getX() - blocks[i][j].getPos().getX() - BLOCK_WIDTH / 2)),
                                 ball.getPos().getY()));
                         ball.invertX();
                     } else if (ball.getPos().getY() < blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2 - BALL_RADIUS) {
                         ball.setPos(new Vector2(ball.getPos().getX(),
-                                ball.getPos().getY() - (BALL_RADIUS - (blocks[i][j].getPos().getY() - ball.getPos().getY() - BLOCK_HEIGHT / 2))));
+                                ball.getPos().getY()
+                                        - (BALL_RADIUS
+                                        - (blocks[i][j].getPos().getY() - ball.getPos().getY() - BLOCK_HEIGHT / 2))));
                         ball.invertY();
                     } else {
                         ball.setPos(new Vector2(ball.getPos().getX(),
-                                ball.getPos().getY() + (BALL_RADIUS - (ball.getPos().getY() - blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2))));
+                                ball.getPos().getY()
+                                        + (BALL_RADIUS
+                                        - (ball.getPos().getY() - blocks[i][j].getPos().getY() - BLOCK_HEIGHT / 2))));
                         ball.invertY();
                     }
                 }
@@ -234,25 +266,25 @@ public class Window extends PApplet implements Constants {
         }
     }
 
-    public void moveBauss() {
+    public void moveVaus() {
         if (isPressedRight) {
-            bauss.moveRight();
+            vaus.moveRight();
             if (isBallBlockCollision) {
-                ball.getPos().setX(ball.getPos().getX() + BAUSS_SPEED);
+                ball.getPos().setX(ball.getPos().getX() + VAUS_SPEED);
             }
         }
 
         if (isPressedLeft) {
-            bauss.moveLeft();
+            vaus.moveLeft();
             if (isBallBlockCollision) {
-                ball.getPos().setX(ball.getPos().getX() - BAUSS_SPEED);
+                ball.getPos().setX(ball.getPos().getX() - VAUS_SPEED);
             }
         }
     }
 
     public void renderBlocks() {
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 13; j++) {
+        for (int i = 0; i < BLOCK_ROW; i++) {
+            for (int j = 0; j < BLOCK_COLUMN; j++) {
                 blocks[i][j].render(this);
             }
         }
@@ -267,9 +299,9 @@ public class Window extends PApplet implements Constants {
         SpriteManager.loadSprites(this, ITEM_SLOW, "./images/item_slow.png", 0, 0, 80, 44, 8);
         SpriteManager.loadSprites(this, ITEM_BONUS, "./images/item_bonus.png", 0, 0, 80, 44, 8);
         SpriteManager.loadSprites(this, ITEM_DOOM, "./images/item_doom.png", 0, 0, 80, 44, 8);
-        SpriteManager.loadSprites(this, BAUSS_NORMAL, "./images/bauss.png", 0, 0, 152, 56, 6);
-        SpriteManager.loadSprites(this, BAUSS_LASER, "./images/bauss_laser.png", 0, 0, 152, 56, 6);
-        SpriteManager.loadSprites(this, BAUSS_EXTEND, "./images/bauss_extended.png", 0, 0, 228, 56, 6);
+        SpriteManager.loadSprites(this, VAUS_NORMAL, "./images/vaus.png", 0, 0, 152, 56, 6);
+        SpriteManager.loadSprites(this, VAUS_LASER, "./images/vaus_laser.png", 0, 0, 152, 56, 6);
+        SpriteManager.loadSprites(this, VAUS_EXTEND, "./images/vaus_extended.png", 0, 0, 228, 56, 6);
 
         SpriteManager.loadImage(this, BLOCK_BLUE, "./images/block_blue.png");
         SpriteManager.loadImage(this, BLOCK_WHITE, "./images/block_white.png");
@@ -293,14 +325,14 @@ public class Window extends PApplet implements Constants {
                 isPressedRight = true;
                 break;
             case 32:
-                if (bauss.getItemState() == ITEM_LASER) {
-                    if (laserBalls.size() < 6) {
-                        laserBalls.add(new LaserBall(bauss.getPos().getX() + 10, bauss.getPos().getY()));
-                        laserBalls.add(new LaserBall(bauss.getPos().getX() - 10, bauss.getPos().getY()));
+                if (vaus.getItemState() == ITEM_LASER) {
+                    if (lasers.size() < LASER_LIMIT) {
+                        lasers.add(new Laser(vaus.getPos().getX() + 10, vaus.getPos().getY()));
+                        lasers.add(new Laser(vaus.getPos().getX() - 10, vaus.getPos().getY()));
                     }
-                } else if (bauss.getItemState() == ITEM_CLASP) {
+                } else if (vaus.getItemState() == ITEM_CLASP) {
                     ball.setPos(new Vector2(ball.getPos().getX(),
-                            ball.getPos().getY() - (BALL_RADIUS - (bauss.getPos().getY() - ball.getPos().getY() - BAUSS_HEIGHT / 2))));
+                            ball.getPos().getY() - (BALL_RADIUS - (vaus.getPos().getY() - ball.getPos().getY() - VAUS_HEIGHT / 2))));
                     ball.setDirection(new Vector2(1, -1));
                     isBallBlockCollision = false;
                 }

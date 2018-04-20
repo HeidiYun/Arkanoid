@@ -13,11 +13,12 @@ public class Block extends View implements Constants {
     private boolean isDestroyed;
 
     public Block(int x, int y, int color, int item, int life) {
-//        this.pos = new Utils.pos2(x, y);
         setPos(Util.indexToCoord(x, y));
         this.color = color;
         this.item = item;
         this.life = life;
+        setWidth(BLOCK_WIDTH);
+        setHeight(BLOCK_HEIGHT);
     }
 
     @Override

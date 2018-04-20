@@ -12,6 +12,8 @@ public class Ball extends View implements Constants {
         setDirection(new Vector2(0, 0));
         setSpeedX(0);
         setSpeedY(0);
+        setWidth(BALL_RADIUS * 2);
+        setHeight(BALL_RADIUS * 2);
     }
 
     public void update() {

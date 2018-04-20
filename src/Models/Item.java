@@ -13,6 +13,8 @@ public class Item extends View implements Constants {
     public Item(Vector2 vector2, int state) {
         setPos(new Vector2(vector2.getX(), vector2.getY()));
         this.state = state;
+        setWidth(ITEM_WIDTH);
+        setHeight(ITEM_HEIGHT);
     }
 
     @Override

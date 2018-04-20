@@ -1,14 +1,17 @@
 package Models;
 
+import Utils.Constants;
 import Utils.Vector2;
 import processing.core.PApplet;
 
-public abstract class View {
+public abstract class View implements Constants {
     private Vector2 pos;
     private Vector2 direction;
     private Vector2 velocity;
     private float speedX;
     private float speedY;
+    private int width;
+    private int height;
 
     public View() {
 
@@ -63,5 +66,21 @@ public abstract class View {
 
     public void invertY() {
         setDirection(new Vector2(getDirection().getX(),getDirection().getY() * -1));
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 }
