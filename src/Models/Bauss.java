@@ -23,9 +23,11 @@ public class Bauss extends View implements Constants {
     public void update() {
         for (int i = 0; i < itemTimes.size(); i++) {
             if (itemTimes.get(i) == 30 * 30) {
-                itemState = 0;
-                wideWidth = 0;
-                getPos().setX(getPos().getX() - BAUSS_WIDTH / 2);
+                if (itemState == ITEM_EXTEND) {
+                    wideWidth = 0;
+                    getPos().setX(getPos().getX() - BAUSS_WIDTH / 2);
+                }
+                itemState = NONE_ITEM;
                 itemTimes.remove(i);
             } else {
                 int time = itemTimes.get(i) + 1;
@@ -50,7 +52,6 @@ public class Bauss extends View implements Constants {
             plusPlayerLife();
         }
         if (itemState == ITEM_EXTEND) {
-            System.out.println("item Extend");
             wideWidth = BAUSS_WIDTH;
             getPos().setX(getPos().getX() + BAUSS_WIDTH / 2);
             itemTimes.add(0);

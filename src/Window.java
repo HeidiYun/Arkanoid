@@ -16,7 +16,9 @@ public class Window extends PApplet implements Constants {
     private boolean isPressedRight;
     private boolean isPressedLeft;
     private boolean start = false;
-    private List<LaserBall> laserBalls = new LinkedList<>();
+    private List<LaserBall> laserBalls = new ArrayList<>();
+    private boolean isBallBlockCollision;
+    private  float diff;
 
 
     public void settings() {
@@ -47,8 +49,10 @@ public class Window extends PApplet implements Constants {
 
     public void draw() {
         tick++;
+
         if (tick % 30 == 0)
             System.out.println(ball.getSpeedY());
+
         background(0);
 
         image(SpriteManager.getImage(BLOCK_WALL, 0), MARGIN_HORIZONTAL - 33, 0,
@@ -67,9 +71,12 @@ public class Window extends PApplet implements Constants {
             bauss.getPos().setY(WINDOW_HEIGHT - 100);
             ball.getPos().setX(bauss.getPos().getX() + 5);
             ball.getPos().setY(bauss.getPos().getY() - Constants.BAUSS_HEIGHT / 2 - BALL_RADIUS);
-            ball.setSpeedX(BALL_SPEED / 2);
-            ball.setSpeedX(BALL_SPEED);
-            ball.setDirection(new Vector2(1, -1));
+            ball.setSpeedX(0);
+            ball.setSpeedX(0);
+            ball.setDirection(new Vector2(0, 0));
+            bauss.setItemState(NONE_ITEM);
+            start = false;
+            tick = 0;
         }
 
         for (int i = 0; i < bauss.getPlayerLife(); i++) {
@@ -81,8 +88,8 @@ public class Window extends PApplet implements Constants {
 
     public void ballBaussCollision() {
         if (CollisionChecker.rectCircleCollision(bauss.getPos(), ball.getPos(), BAUSS_WIDTH + bauss.getWideWidth(), BAUSS_HEIGHT, BALL_RADIUS) && start) {
-            float diff = Util.difference(ball.getPos().getX(), bauss.getPos().getX());
-            if (bauss.getItemState() != ITEM_CLASP) {
+            diff = Util.difference(ball.getPos().getX(), bauss.getPos().getX());
+            {
                 System.out.println(diff);
                 if (diff > 0) {
                     if (ball.getVelocity().getX() < 0) {
@@ -99,7 +106,11 @@ public class Window extends PApplet implements Constants {
                     ball.setSpeedX(ball.getSpeedX() * ((-1) * diff / 10));
                     ball.invertY();
                 }
+                
+
+
             }
+
         }
     }
 
@@ -141,6 +152,10 @@ public class Window extends PApplet implements Constants {
     public void drawBall() {
         initBall();
 
+        if (bauss.getItemState() == ITEM_SLOW) {
+            ball.setSpeedX((float) (ball.getSpeedX() * 0.1));
+            ball.setSpeedX((float) (ball.getSpeedY() * 0.1));
+        }
         ball.render(this);
         ball.update();
     }
@@ -205,17 +220,34 @@ public class Window extends PApplet implements Constants {
     }
 
     public void initBall() {
-        if (!start && millis() > 2000) {
+        if (!start && tick > 30 * 2) {
+            System.out.println("init");
             ball.setSpeedX(BALL_SPEED / 2);
             ball.setSpeedY(BALL_SPEED);
             ball.setDirection(new Vector2(1, -1));
             start = true;
+            isBallBlockCollision = false;
+        } else {
+            if (!start)
+                isBallBlockCollision = true;
+            else isBallBlockCollision = false;
         }
     }
 
     public void moveBauss() {
-        if (isPressedRight) bauss.moveRight();
-        if (isPressedLeft) bauss.moveLeft();
+        if (isPressedRight) {
+            bauss.moveRight();
+            if (isBallBlockCollision) {
+                ball.getPos().setX(ball.getPos().getX() + BAUSS_SPEED);
+            }
+        }
+
+        if (isPressedLeft) {
+            bauss.moveLeft();
+            if (isBallBlockCollision) {
+                ball.getPos().setX(ball.getPos().getX() - BAUSS_SPEED);
+            }
+        }
     }
 
     public void renderBlocks() {
@@ -266,6 +298,11 @@ public class Window extends PApplet implements Constants {
                         laserBalls.add(new LaserBall(bauss.getPos().getX() + 10, bauss.getPos().getY()));
                         laserBalls.add(new LaserBall(bauss.getPos().getX() - 10, bauss.getPos().getY()));
                     }
+                } else if (bauss.getItemState() == ITEM_CLASP) {
+                    ball.setPos(new Vector2(ball.getPos().getX(),
+                            ball.getPos().getY() - (BALL_RADIUS - (bauss.getPos().getY() - ball.getPos().getY() - BAUSS_HEIGHT / 2))));
+                    ball.setDirection(new Vector2(1, -1));
+                    isBallBlockCollision = false;
                 }
                 break;
 

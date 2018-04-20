@@ -1,6 +1,7 @@
 package Utils;
 
 public interface Constants {
+    int NONE_ITEM = 0;
     int ITEM_PLAYER = 1;
     int ITEM_LASER = 2;
     int ITEM_EXTEND = 3;
