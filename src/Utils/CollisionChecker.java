@@ -9,12 +9,19 @@ import java.util.List;
 public class CollisionChecker {
     // layer를 숫자로
     // onCollision에서 충동한 객체도 알아야함
+    //왜 사각형 원 충돌에서 사각형과 사각형의 거리를 구하는 걸까..
+
+     public enum Direction {
+        T, LT, L, LB, B, RB, R, RT, NONE
+    }
 
     private static HashMap<Class<? extends View>, List<View>> library = new HashMap<>();
     private static HashMap<Class<? extends View>, String> shapes = new HashMap<>();
+
     private static HashMap<View, OnCollisionListener> listeners = new HashMap<>();
 
-    public CollisionChecker() { }
+    public CollisionChecker() {
+    }
 
     public void addOnCollisionListener(View view, OnCollisionListener listener) {
         listeners.put(view, listener);
@@ -78,11 +85,30 @@ public class CollisionChecker {
         return library;
     }
 
-    private static void alertListener(View target, View comparisonTarget) {
+    private static void alertListener(View target, View comparisonTarget, Direction direction) {
         if (listeners.get(target) != null)
-            listeners.get(target).onCollision(target);
+            listeners.get(target).onCollision(target, comparisonTarget, direction);
         if (listeners.get(comparisonTarget) != null)
-            listeners.get(comparisonTarget).onCollision(comparisonTarget);
+            listeners.get(comparisonTarget).onCollision(comparisonTarget, target, direction);
+    }
+
+    public static Direction alertCollisionDirection(Vector2 target, Vector2 compareTarget, int targetWidth, int targetHeight) {
+        if (Math.abs(target.getX() - compareTarget.getX()) > targetWidth / 2
+                && Math.abs(target.getY() - compareTarget.getY()) > targetHeight / 2) {
+            if (target.getX() > compareTarget.getX()
+                    && target.getY() > compareTarget.getY()) return Direction.LT;
+            else if (target.getX() > compareTarget.getX()
+                    && target.getY() < compareTarget.getY()) return Direction.LB;
+            else if (target.getX() < compareTarget.getX()
+                    && target.getY() > compareTarget.getY()) return Direction.RT;
+            else return Direction.RB;
+
+        } else {
+            if (target.getX() > compareTarget.getX()) return Direction.L;
+            else if (target.getX() < compareTarget.getX()) return Direction.R;
+            else if (target.getY() > compareTarget.getY()) return Direction.T;
+            else return Direction.B;
+        }
     }
 
     public static void checkCollisions() {
@@ -99,7 +125,7 @@ public class CollisionChecker {
                     for (View t : targetList) {
                         for (View ct : compareTargetList) {
                             if (rectCircleCollision(t.getPos(), ct.getPos(), t.getWidth(), t.getHeight(), ct.getHeight() / 2)) {
-                                alertListener(t, ct);
+                                alertListener(t, ct, alertCollisionDirection(t.getPos(), ct.getPos(), t.getWidth(), t.getHeight()));
                                 System.out.println("rectCircleCollision");
                             }
                         }
@@ -111,7 +137,7 @@ public class CollisionChecker {
                     for (View t : targetList) {
                         for (View ct : compareTargetList) {
                             if (rectCollision(t.getPos(), ct.getPos(), t.getWidth(), t.getHeight(), ct.getWidth(), ct.getHeight())) {
-                                alertListener(t, ct);
+                                alertListener(t, ct, Direction.NONE);
                                 System.out.println("rectCollision");
                             }
                         }
@@ -123,7 +149,7 @@ public class CollisionChecker {
                     for (View t : targetList) {
                         for (View ct : compareTargetList) {
                             if (rectPointCollision(t.getPos(), ct.getPos(), t.getWidth(), t.getHeight())) {
-                                alertListener(t, ct);
+                                alertListener(t, ct, Direction.NONE);
                                 System.out.println("rectPointCollision");
                             }
 
@@ -137,7 +163,7 @@ public class CollisionChecker {
                     for (View t : targetList) {
                         for (View ct : compareTargetList) {
                             if (circleCollision(t.getPos(), ct.getPos(), t.getWidth() / 2, t.getHeight() / 2)) {
-                                alertListener(t, ct);
+                                alertListener(t, ct, Direction.NONE);
                                 System.out.println("CircleCollision");
                             }
                         }
@@ -149,7 +175,7 @@ public class CollisionChecker {
                     for (View t : targetList) {
                         for (View ct : compareTargetList) {
                             if (circlePointCollision(t.getPos(), ct.getPos(), t.getWidth() / 2)) {
-                                alertListener(t, ct);
+                                alertListener(t, ct, Direction.NONE);
                                 System.out.println("CirclePointCollision");
                             }
                         }

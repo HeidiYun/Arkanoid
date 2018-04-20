@@ -13,7 +13,6 @@ public abstract class View implements Constants {
     private int height;
 
     public View() {
-
     }
 
     public abstract void update();

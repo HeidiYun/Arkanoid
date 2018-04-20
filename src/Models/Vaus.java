@@ -24,7 +24,7 @@ public class Vaus extends View implements Constants {
 
     public void update() {
         for (int i = 0; i < itemTimes.size(); i++) {
-            if (itemTimes.get(i) == 30 * 30) {
+            if (itemTimes.get(i) == 30 * 10) {
                 itemState = 0;
                 wideWidth = 0;
                 getPos().setX(getPos().getX() - VAUS_WIDTH / 2);
