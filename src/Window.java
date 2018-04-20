@@ -16,10 +16,13 @@ public class Window extends PApplet implements Constants {
     private boolean isPressedRight;
     private boolean isPressedLeft;
     private boolean start = false;
-    private boolean isBallVausCollision;
+    private boolean isBallAttached;
+    private float diff;
     private List<Laser> lasers = new LinkedList<>();
     private CollisionChecker collisionChecker = new CollisionChecker();
-
+    private boolean pressedSpacebar;
+    private float tempSpeedX;
+    private float tempSpeedY;
 
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -47,18 +50,12 @@ public class Window extends PApplet implements Constants {
     }
 
     private void addListeners() {
-        collisionChecker.addOnCollisionListener(vaus, (view) -> {
-            System.out.println(view.toString() + " vaus col!");
-            ballVausCollision();
-        });
+        collisionChecker.addOnCollisionListener(vaus, view -> System.out.println(view.toString() + " vaus col!"));
         collisionChecker.addOnCollisionListener(ball, view -> System.out.println(view.toString() + " ball col!"));
 
         for (int i = 0; i < BLOCK_ROW; i++) {
             for (int j = 0; j < BLOCK_COLUMN; j++) {
-                collisionChecker.addOnCollisionListener(blocks[i][j], view -> {
-                    System.out.println(view.toString() + " blocks[i][j] col!");
-                    ballBlockCollision();
-                });
+                collisionChecker.addOnCollisionListener(blocks[i][j], view -> System.out.println(view.toString() + " blocks[i][j] col!"));
             }
         }
     }
@@ -84,7 +81,7 @@ public class Window extends PApplet implements Constants {
         tick++;
 
         if (tick % 30 == 0)
-            System.out.println(ball.getSpeedY());
+            System.out.println(ball.getSpeed());
 
         background(0);
 
@@ -94,7 +91,7 @@ public class Window extends PApplet implements Constants {
         drawItems();
         drawLaserBalls();
         laserBallBlockCollision();
-//        ballVausCollision();
+        ballVausCollision();
         drawVaus();
         drawBall();
 
@@ -104,8 +101,7 @@ public class Window extends PApplet implements Constants {
             vaus.getPos().setY(WINDOW_HEIGHT - 100);
             ball.getPos().setX(vaus.getPos().getX() + 5);
             ball.getPos().setY(vaus.getPos().getY() - VAUS_HEIGHT / 2 - BALL_RADIUS);
-            ball.setSpeedX(0);
-            ball.setSpeedX(0);
+            ball.setSpeed(0);
             ball.setDirection(new Vector2(0, 0));
             vaus.setItemState(NONE_ITEM);
             start = false;
@@ -119,36 +115,34 @@ public class Window extends PApplet implements Constants {
 
     }
 
-
-
     public void ballVausCollision() {
         if (CollisionChecker.rectCircleCollision(vaus.getPos(), ball.getPos(), VAUS_WIDTH + vaus.getWideWidth(),
                 VAUS_HEIGHT, BALL_RADIUS) && start) {
+
             float diff = Util.difference(ball.getPos().getX(), vaus.getPos().getX());
-            if (vaus.getItemState() != ITEM_CLASP) {
-//                System.out.println(diff);
-                if (diff > 0) {
-                    if (ball.getVelocity().getX() < 0) {
-                        ball.invertX();
-                    }
-//                ball.setSpeedY(ball.getSpeedY() - (ball.getSpeedX() - ball.getSpeedX() * diff/10));
-                    ball.setSpeedX(ball.getSpeedX() * diff / 10);
-                    ball.invertY();
-                } else {
-                    if (ball.getVelocity().getX() > 0) {
-                        ball.invertX();
-                    }
-//                ball.setSpeedY(ball.getSpeedY() - (ball.getSpeedX() - ball.getSpeedX() * diff/10));
-                    ball.setSpeedX(ball.getSpeedX() * ((-1) * diff / 10));
-                    ball.invertY();
-                }
+
+            float max = ball.getWidth() / 2 + vaus.getWidth() / 2;
+             // MIN : ball.getWidth() / 2 * - 1 + vaus.getWidth() / 2 * - 1; => -4
+
+            float val = diff / max;
+            ball.setDirection(new Vector2( val * 4, -1).normalize());
+
+            if (vaus.getItemState() == ITEM_CLASP && !isBallAttached && !pressedSpacebar) {
+//
+                ball.setPos(new Vector2(ball.getPos().getX(),
+                        ball.getPos().getY() - (BALL_RADIUS - (vaus.getPos().getY() - ball.getPos().getY() - VAUS_HEIGHT / 2))));
+                ball.setSpeed(0);
+                isBallAttached = true;
             }
+
         }
+
     }
+
 
     public void drawBlocks() {
         renderBlocks();
-//        ballBlockCollision();
+        ballBlockCollision();
     }
 
     public void drawLaserBalls() {
@@ -176,8 +170,6 @@ public class Window extends PApplet implements Constants {
         }
     }
 
-    public void itemCollision() {}
-
     public void drawVaus() {
         moveVaus();
         vaus.update();
@@ -188,8 +180,7 @@ public class Window extends PApplet implements Constants {
         initBall();
 
         if (vaus.getItemState() == ITEM_SLOW) {
-            ball.setSpeedX((float) (ball.getSpeedX() * 0.1));
-            ball.setSpeedX((float) (ball.getSpeedY() * 0.1));
+            ball.setSpeed((float) (ball.getSpeed() * 0.1));
         }
         ball.render(this);
         ball.update();
@@ -260,34 +251,30 @@ public class Window extends PApplet implements Constants {
         }
     }
 
-
-
     public void initBall() {
         if (!start && tick > 30 * 2) {
             System.out.println("init");
-            ball.setSpeedX(BALL_SPEED / 2);
-            ball.setSpeedY(BALL_SPEED);
+            ball.setSpeed(BALL_SPEED);
             ball.setDirection(new Vector2(1, -1));
             start = true;
-            isBallVausCollision = false;
+            isBallAttached = false;
         } else {
             if (!start)
-                isBallVausCollision = true;
-            else isBallVausCollision = false;
+                isBallAttached = true;
         }
     }
 
     public void moveVaus() {
         if (isPressedRight) {
             vaus.moveRight();
-            if (isBallVausCollision) {
+            if (isBallAttached) {
                 ball.getPos().setX(ball.getPos().getX() + VAUS_SPEED);
             }
         }
 
         if (isPressedLeft) {
             vaus.moveLeft();
-            if (isBallVausCollision) {
+            if (isBallAttached) {
                 ball.getPos().setX(ball.getPos().getX() - VAUS_SPEED);
             }
         }
@@ -342,10 +329,9 @@ public class Window extends PApplet implements Constants {
                         lasers.add(new Laser(vaus.getPos().getX() - 10, vaus.getPos().getY()));
                     }
                 } else if (vaus.getItemState() == ITEM_CLASP) {
-                    ball.setPos(new Vector2(ball.getPos().getX(),
-                            ball.getPos().getY() - (BALL_RADIUS - (vaus.getPos().getY() - ball.getPos().getY() - VAUS_HEIGHT / 2))));
-                    ball.setDirection(new Vector2(1, -1));
-                    isBallVausCollision = false;
+                    pressedSpacebar = true;
+                    isBallAttached = false;
+                    ball.setSpeed(BALL_SPEED);
                 }
                 break;
 
@@ -360,6 +346,8 @@ public class Window extends PApplet implements Constants {
             case RIGHT:
                 isPressedRight = false;
                 break;
+            case 32 :
+                pressedSpacebar = false;
         }
 
     }

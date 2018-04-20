@@ -8,8 +8,7 @@ public abstract class View implements Constants {
     private Vector2 pos;
     private Vector2 direction;
     private Vector2 velocity;
-    private float speedX;
-    private float speedY;
+    private float speed;
     private int width;
     private int height;
 
@@ -36,20 +35,12 @@ public abstract class View implements Constants {
         this.direction = direction;
     }
 
-    public float getSpeedX() {
-        return speedX;
+    public float getSpeed() {
+        return speed;
     }
 
-    public void setSpeedX(float speedX) {
-        this.speedX = speedX;
-    }
-
-    public float getSpeedY() {
-        return speedY;
-    }
-
-    public void setSpeedY(float speedY) {
-        this.speedY = speedY;
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 
     public Vector2 getVelocity() {

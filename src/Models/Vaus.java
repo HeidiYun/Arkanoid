@@ -58,7 +58,8 @@ public class Vaus extends View implements Constants {
             getPos().setX(getPos().getX() + VAUS_WIDTH / 2);
             itemTimes.add(0);
         } else {
-            itemTimes.add(0);
+            if (itemState != NONE_ITEM)
+                itemTimes.add(0);
         }
     }
 

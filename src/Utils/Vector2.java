@@ -46,10 +46,40 @@ public class Vector2 {
         return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     }
 
+    public static float magnitude(Vector2 vector2) {
+        return (float) Math.sqrt(Math.pow(vector2.getX(), 2) + Math.pow(vector2.getY(), 2));
+    }
+
+    public static float magnitude(float x, float y) {
+        return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    }
+
+    public static float normalizeX(float x, float y) {
+        return x /= magnitude(x, y);
+    }
+
+    public static float normalizeY(float x, float y) {
+        return y /= magnitude(x, y);
+    }
+
     public Vector2 normalize() {
         this.x /= this.magnitude();
         this.y /= this.magnitude();
         return this;
+    }
+
+    public static Vector2 normalize(Vector2 vector2) {
+        vector2.setX(vector2.getX() / magnitude(vector2));
+        vector2.setY(vector2.getY() / magnitude(vector2));
+        return vector2;
+    }
+
+    public float normalizeX() {
+        return this.x /= this.magnitude();
+    }
+
+    public float normalizeY() {
+        return this.y /= this.magnitude();
     }
 
     public float getX() {

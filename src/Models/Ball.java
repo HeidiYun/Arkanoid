@@ -10,15 +10,14 @@ public class Ball extends View implements Constants {
     public Ball(float x, float y) {
         setPos(new Vector2(x, y));
         setDirection(new Vector2(0, 0));
-        setSpeedX(0);
-        setSpeedY(0);
+        setSpeed(0);
         setWidth(BALL_RADIUS * 2);
         setHeight(BALL_RADIUS * 2);
     }
 
     public void update() {
         checkWall();
-        setVelocity(new Vector2(getSpeedX() * getDirection().getX(), getSpeedY() * getDirection().getY()));
+        setVelocity(new Vector2(getSpeed() * getDirection().getX(), getSpeed() * getDirection().getY()));
         setPos(Vector2.add(getPos(), getVelocity()));
     }
 
